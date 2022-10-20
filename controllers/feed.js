@@ -1,16 +1,46 @@
+const Post = require('../models/post');
+const { validationResult } = require('express-validator');
+
 exports.getPosts = (req, res, next) => {
-    res.status(200).json({
-        'title': 'Hey I am first post'
-    });
+    Post.find()
+        .then(posts => {
+            res.status(200).json(posts)
+        })
+        .catch(err => next(err));
 }
 
 exports.createPost = (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        err = errors.array();
+        return res.status(400).json({
+            'message': err[0].msg
+        });
+    }
+
+    if (!req.file) {
+        return res.status(400).json({
+            'message': 'Image is not selected'
+        });
+    }
+
     const title = req.body.title;
     const content = req.body.content;
+    const date = Date.now();
+    const imageUrl = '/' + req.file.path;
 
-    res.status(201).json({
-        'message': 'post created',
-        'title': title,
-        'content': content
+    const post = new Post({
+        title: title,
+        content: content,
+        date: date,
+        imageUrl: imageUrl
     });
+
+    post.save()
+        .then(result => {
+            return res.status(201).json({
+                'message': 'post created',
+            })
+        })
+        .catch(err => next(err));
 }

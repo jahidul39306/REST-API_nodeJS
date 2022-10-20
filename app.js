@@ -2,8 +2,13 @@ require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
 const feedRoutes = require('./routes/feed');
+const mongoose = require('mongoose');
+const multerMiddleware = require('./middleware/multerMiddleware');
+const path = require('path');
 
 const app = express();
+
+app.use('/images', express.static(path.join(__dirname, 'images')));
 
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -12,8 +17,23 @@ app.use((req, res, next) => {
     next();
 });
 
+app.use(multerMiddleware.multerMiddleware);
+
 app.use(bodyParser.json());
 
 app.use('/feed', feedRoutes);
 
-app.listen(process.env.PORT);
+app.use((error, req, res, next) => {
+    console.log(error);
+    res.status(500).json({
+        'message': 'Something went wrong',
+    })
+});
+
+mongoose.connect(process.env.MONGODB_URI)
+.then(() => {
+    console.log('connected');
+    app.listen(process.env.PORT)
+})
+.catch(err => console.log(err));
+
