@@ -14,9 +14,13 @@ const postSchema = new Schema({
     date: {
         required: true,
         type: Date
+    },
+    creator: {
+        name: {
+            Type: String,
+            default: ''
+        }
     }
-}, {
-    timestamps: true
 });
 
 module.exports = mongoose.model('Post', postSchema);

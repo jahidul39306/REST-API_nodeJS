@@ -4,7 +4,18 @@ const { validationResult } = require('express-validator');
 exports.getPosts = (req, res, next) => {
     Post.find()
         .then(posts => {
-            res.status(200).json(posts)
+            const creator = { name: 'Jahid' }
+            posts = posts.map(p => {
+                return {
+                    _id : p._id,
+                    title: p.title,
+                    content: p.content,
+                    imageUrl: p.imageUrl,
+                    createdAt: p.date, 
+                    creator: creator
+                };
+            });
+            res.status(200).json({posts});
         })
         .catch(err => next(err));
 }
@@ -43,4 +54,17 @@ exports.createPost = (req, res, next) => {
             })
         })
         .catch(err => next(err));
+}
+
+exports.singlePost = (req, res, next) => {
+    const postId = req.params.postId;
+
+    Post.findById(postId)
+    .then(post => {
+        // if(!post){
+        //     return res.status(404).json({message: 'Could not find post'});
+        // }
+        return res.status(200).json({post});
+    })
+    .catch(err => next(err));
 }

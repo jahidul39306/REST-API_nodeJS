@@ -18,4 +18,4 @@ const fileFilter = (req, file, cb) => {
     }
 };
 
-exports.multerMiddleware = multer({storage: fileStorage, fileFilter: fileFilter}).single('image');
+exports.multerMiddleware = multer({ storage: fileStorage, fileFilter: fileFilter }).single('image');
