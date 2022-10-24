@@ -41,12 +41,14 @@ exports.createPost = (req, res, next) => {
     const content = req.body.content;
     const date = Date.now();
     const imageUrl = '/' + req.file.path;
+    const userId = req.user.userId.toString();
 
     const post = new Post({
         title: title,
         content: content,
         date: date,
-        imageUrl: imageUrl
+        imageUrl: imageUrl,
+        creator: userId
     });
 
     post.save()
@@ -82,6 +84,8 @@ exports.editPost = (req, res, next) => {
     const postId = req.params.postId;
     const title = req.body.title;
     const content = req.body.content;
+    const userId = req.user.userId.toString();
+
     let imageUrl = req.body.image;
     if (req.file) {
         imageUrl = '/' + req.file.path;
@@ -93,6 +97,11 @@ exports.editPost = (req, res, next) => {
     }
     Post.findById(postId)
         .then(post => {
+            if(post.creator._id.toString() !== userId){
+                return res.status(422).json({
+                    'message': 'Not authorized'
+                });
+            }
             if (post.imageUrl) {
                 if (post.imageUrl !== imageUrl) {
                     //Both ways of deleting file can work, but the first approach is more preferable.
@@ -116,8 +125,14 @@ exports.editPost = (req, res, next) => {
 
 exports.deletePost = (req, res, next) => {
     const postId = req.params.postId;
+    const userId = req.user.userId.toString();
     Post.findById(postId)
     .then(post => {
+        if(post.creator._id.toString() !== userId){
+            return res.status(422).json({
+                'message': 'Not authorized'
+            });
+        }
         if(post.imageUrl){
             const filePath = path.join(__dirname, '..', post.imageUrl);
             fileSystem.deleteFile(filePath);
