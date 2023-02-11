@@ -22,7 +22,7 @@ app.use(multerMiddleware.multerMiddleware);
 
 app.use(bodyParser.json());
 
-// Roters
+// Routers
 app.use('/feed', feedRoutes);
 app.use('/auth', authRoutes);
 //
